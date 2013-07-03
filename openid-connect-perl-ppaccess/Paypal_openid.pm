@@ -9,44 +9,46 @@ use warnings;
 
 =head1 SYNOPSIS
 	
-	Paypal open id authorization process:
+	Paypal open id sign up process sequence:
 	
-	You must register your web application in PayPal and must have valid 
-	CLIENT_ID and CLIENT_SECRET keys.
-	
-	When user of your application wants sign up/in via PayPal openid auth
-	(he must have valid PayPal account) - you must return special URL for
-	redirect him to PayPal authorization form.
+	For first, you must have web application
+	registered in PayPal, valid CLIENT_ID 
+	and CLIENT_SECRET keys, received from PayPal.
 
-	You must have also a url of your script, which will be used by PayPal for
-	redirect your back into your web application after PayPal authorization.
-	This url must be setted into special field of the your application
-	PayPal's page.
-
-	Create a paypal open id object using method new();
-
-	my $ppa = Paypal_openid->new({ ... see params in the new() method description ... })
+	Your web application has url with cgi script
+	which implements PayPal auth process.
 	
-	Generate url for user of your web application and send with redirect header 
-	to his browser for redirect him to this url.
+		Create a paypal open id object using method new();
+		my $ppa = Paypal_openid->new(
+			{ 
+				...
+				see params in the new() method description
+				...
+			}
+		);
 
-	my $redirect_url = $ppa->get_auth_url;	
+	When user clicks to 'Sign up with PayPal' button, he should
+	be redirected to url which was generated using get_auth_url
+	method.
+
+		my $redirect_url = $ppa->get_auth_url;	
 	
-	When user will be redirected back, you should extract CGI param 'code'
-	and get access tokens using get_access_token() method
+	When user will be redirected back according defined url,
+	your script should extract CGI param 'code'
+	and get tokens using get_access_token() method
 	
-	$ppa->get_access_token($code_returned_from_paypal);
+		$ppa->get_access_token($code_returned_from_paypal);
 
 	If previous method returned true (in fact this method returns hash ref
-	with access keys), you can take profile info of user and use it for
-	sign up/in in your web application
+	with access keys and some other values), you can take profile info of 
+	user and use these values for sign up
 
-	my $user_info = $ppa->get_profile;
+		my $user_info = $ppa->get_profile;
 
 	If one of methods returned undef, you can extract error using method
 	get_error();
 
-	my $err_string = $ppa->get_error;
+		my $err_string = $ppa->get_error;
 
 	There are also optional methods for refresh and validate access tokens
 	and for end PayPal session. You can read about them, about extended
@@ -87,18 +89,26 @@ use constant LOGOUT_ENDPOINT
 	
 		my $ppa = Paypal_openid->new(
 			{
-			'client_id' 	=> 'CLIENT_ID',		# key of paypal applicaton <MANDATORY>
-			'client_secret' => 'CLIENT_SECRET',	# secret string of paypal application <MANDATORY>
-			'redirect_url' 	=> 'REDIRECT_URL',	# url login form of your website <MANDATORY>
+			# key of paypal applicaton <MANDATORY>
+			'client_id' 	=> 'CLIENT_ID',
+			
+			# secret string of paypal application <MANDATORY>
+			'client_secret' => 'CLIENT_SECRET',
 
-			'scope'		=> 'openid email',	# Data which should be returned from paypal profile [optional]
-								# But when you change it, remember that param 'openid' is always mandatory
+			# url login form of your website <MANDATORY>
+			'redirect_url' 	=> 'REDIRECT_URL',
+			
+			# Data which should be returned from paypal profile [optional]
+			# But when you change it, remember that param 'openid' is always mandatory
+			'scope'		=> 'openid email',
 
-			'authorization_endpoint' => 'https://', # These endpoints are hardcoded as constants in the module's code.
-			'access_token_endpoint' => 'https://',	# But you can change them to any other urls
-			'profile_endpoint' => 'https://',	# Just set of appropriate key in the hash of new() method
-			'validate_endpoint' => 'https://',	#
-			'logout_endpoint' => 'https://',	#
+			# Then endpoints below are hardcoded as constants 
+			# in the module's code. But it is possible to set them.
+			'authorization_endpoint' => 'https://',
+			'access_token_endpoint' => 'https://',
+			'profile_endpoint' => 'https://',
+			'validate_endpoint' => 'https://',
+			'logout_endpoint' => 'https://',
 			}
 		);
 
